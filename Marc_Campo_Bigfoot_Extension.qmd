@@ -1,0 +1,165 @@
+---
+title: "DATA 607 Tidyverse CREATE Assignment - Marcin K"
+format: html
+editor: visual
+---
+
+## Goal
+
+In this assignment, you’ll practice collaborating around a code project with GitHub.  You could consider our collective work as building out a book of examples on how to use TidyVerse functions.
+
+GitHub repository: [ ](https://github.com/acatlin/SPRING2023TIDYVERSE)<https://github.com/DW8888/fall2027-data707-tidyverse-assignment.git>[\*\*\*\*](https://github.com/acatlin/SPRING2019TIDYVERSE)
+
+You may use any dataset that you like.
+
+[Kaggle datasets](https://www.kaggle.com/datasets). 
+
+Your task here is to **Create an Example.**  Using one or more TidyVerse packages, and any dataset from fivethirtyeight.com or Kaggle or another source of your choosing, create a programming sample “vignette” that demonstrates how to use one or more of the capabilities of the selected TidyVerse package with your selected dataset. (25 points)
+
+**Later**, you'll be asked to extend an existing vignette. **Using one of your classmate’s examples (as created above), you'll then extend his or her example with additional annotated code.**
+
+**(15 points)**
+
+**Step-by-Step.** You should create a forked copy of the provided repository. Once you have code to submit, you should add it to your forked copy, then make a pull request on the provided shared repository. You should also update the README.md file with your example. Below is a demonstration that lays out the steps for creating a forked copy of a repository, adding or changing code in your forked copy, then generating a pull request to the shared repository:
+
+## Data
+
+For this assignment, I will use a dataset of bigfood sightings from Kaggle:
+
+Link to the data set: [Bigfoot Sightings](https://www.kaggle.com/datasets/thedevastator/unlocking-mysteries-of-bigfoot-through-sightings)
+
+```{r Intro, echo: false}
+library(tidyverse)
+library(DT)
+```
+
+## Reading the Data from Github
+
+```{r Chunk1}
+
+# Load the bfro_locations.csv file
+
+bigfoot <- read_csv("https://raw.githubusercontent.com/MarcinKayfromBK/DATA-607-MarcinK/refs/heads/main/bfro_locations.csv")
+
+#The raw data loads with two null columns at the end so let's delete them. 
+bigfoot <- bigfoot[, -c(8,9)]
+
+datatable(bigfoot)
+
+
+```
+
+## Capability 1: Converting Characters to Numbers in Column 6 with Mutate
+
+**Dplyr** is a Tidyverse package in R for data manipulation designed to make working with data frames and tibbles fast, readable, and intuitive. Part of the [tidyverse](https://dplyr.tidyverse.org/) suite, it provides a consistent set of function "verbs" that translate your data analysis thoughts directly into code.
+
+**Mutate()** is a function in the dplyr package is used to create, modify, or delete columns in a data frame. It applies a transformation to your data while keeping the total number of rows intact and preserving all other existing columns
+
+# Example
+
+```{r Chunk2}
+
+# In this chunk, we will use the mutate function to convert latitude into a numeric column. From the original CSV data, longitude is automatically imported as numeric but latitude comes in as a character. 
+
+bigfoot <- bigfoot %>%
+  mutate(across(latitude, as.numeric))
+
+```
+
+## Capability 2: Slice Function from Dplyr
+
+The **Slice()** function is used to select, remove, or duplicate rows of a dataframe by their integer positions rather than by logical conditions.
+
+# Example
+
+```{r Chunk3}
+
+bigfoot %>% slice(c(15:18, 35, 140:145)) # Passed as a vector
+
+```
+
+## Capability 3: Cleaning Column 5 with Lubridate
+
+**Lubridate** is a Tidyverse package that makes it easier to work with dates and times in R. As of the latest tidyverse release, lubridate is part of core tidyverse.
+
+**ymd_hms()** is a core function in the R package lubridate designed to parse character or numeric vectors into POSIXct date-time objects.
+
+# Example
+
+```{r Chunk4}
+
+# Load the bfro_locations.csv file
+
+bigfoot <- bigfoot %>% 
+  mutate(timestamp_dttm = ymd_hms(timestamp))
+
+```
+
+
+# EXTENSION BY MARC CAMPO
+
+Thanks for the opportunity to extend this project.  Love the topic!  This would be a great dataset to add a map to.   I used ggplot and maps to create a map of the US and then geom_point to mark the sightings.  Geom_polygon was used to create the blank map.  
+
+
+## Adding a Visualization 
+
+In the map below you can see where the sightings were.  Some of the locations are surprising.  Florida?  There is a concentration in the pacific northwest which is an area we have always associated with Bigfoot.  Some are just north of the US.  
+
+
+```{r, warning=F}
+library(ggplot2)
+library(maps)
+
+
+# US map
+us_map <- map_data("state")
+
+ggplot() +
+  geom_polygon(
+    data = us_map,
+    aes(x = long, y = lat, group = group),
+    fill = "gray95", color = "white"
+  ) +
+  geom_point(
+    data = bigfoot,
+    aes(x = longitude, y = latitude),
+    color = "steelblue", alpha = 0.4, size = 1
+  ) +
+  coord_quickmap(xlim = c(-125, -66), ylim = c(24, 50)) +
+  labs(
+    title = "Bigfoot Sightings Across the United States",
+        x = NULL, y = NULL
+  ) +
+  theme_void() +
+  theme(
+    plot.title = element_text(size = 18, face = "bold"),
+    plot.subtitle = element_text(size = 11)
+  )
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## Sources:
+
+1.  Wilson, J. (n.d.). DATA607 Tidyverse assignment. RPubs. https://rpubs.com/javernw/jwDATA607Tidyversedplyr
+
+2.  Jacob, I. (n.d.). DATA 607_Tidyverse_CREATE_assignment. RPubs. https://rpubs.com/Irene_J/681075
+
+3.  Wickham, H., Çetinkaya-Rundel, M., & Grolemund, G. (2023). R for data science: Import, tidy, transform, visualize, and model data (2nd ed.). O'Reilly Media. https://r4ds.hadley.nz
+
+4.  Google. (2026). Google search (AI-enabled overview) \[Large language model\]. https://www.google.com
